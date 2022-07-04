@@ -35,7 +35,7 @@
          (when platform/ios?
            {:padding-top 2})))
 
-(defn text-input [contact-request]
+(defn text-input-old [contact-request]
   (merge typography/font-regular
          typography/base
          {:flex               1
@@ -49,6 +49,20 @@
            {:padding-vertical 2}
            {:padding-top    (if contact-request 10 2)
             :padding-bottom (if contact-request 5 6)})))
+
+(defn text-input []
+  (merge typography/font-regular
+         typography/base
+         {:flex               1
+          :min-height         34
+          :margin             0
+          :flex-shrink        1
+          :color              (:text-01 @colors/theme)
+          :margin-horizontal 20}
+         (if platform/android?
+           {:padding-vertical 8}
+           {:margin-top    8
+            :margin-bottom 8})))
 
 (defn actions-wrapper [show-send]
   (merge

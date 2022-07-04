@@ -5,7 +5,7 @@
             [quo.design-system.colors :as colors]
             ["react-native-gesture-handler"
              :refer (TapGestureHandler PanGestureHandler LongPressGestureHandler
-                                       PureNativeButton TouchableWithoutFeedback TouchableOpacity
+                                        TouchableWithoutFeedback TouchableOpacity
                                        TouchableHighlight
                                        createNativeWrapper State NativeViewGestureHandler
                                        FlatList ScrollView)]))
@@ -25,8 +25,6 @@
 (def long-press-gesture-handler
   (reagent/adapt-react-class LongPressGestureHandler))
 
-(def pure-native-button PureNativeButton)
-
 (def touchable-without-feedback-class TouchableWithoutFeedback)
 
 (def touchable-without-feedback
@@ -41,12 +39,6 @@
 
 (def touchable-opacity
   (reagent/adapt-react-class TouchableOpacity))
-
-(def raw-button
-  (reagent/adapt-react-class
-   (createNativeWrapper (.createAnimatedComponent animated PureNativeButton)
-                        #js {:shouldActivateOnStart   true
-                             :shouldCancelWhenOutside true})))
 
 (def native-view-gesture-handler (reagent/adapt-react-class NativeViewGestureHandler))
 

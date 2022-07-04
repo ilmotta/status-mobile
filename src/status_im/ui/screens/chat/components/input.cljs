@@ -1,6 +1,7 @@
 (ns status-im.ui.screens.chat.components.input
   (:require [status-im.ui.components.icons.icons :as icons]
             [quo.react-native :as rn]
+            [oops.core :refer [oget]]
             [quo.react :as react]
             [quo.platform :as platform]
             [quo.components.text :as text]
@@ -19,7 +20,10 @@
             [quo.components.list.item :as list-item]
             [status-im.ui.screens.chat.photos :as photos]
             [reagent.core :as reagent]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [quo2.components.button :as quo2]
+            [quo2.reanimated :as reanimated]
+            [quo2.gesture :as gesture]))
 
 (defn input-focus [text-input-ref]
   (some-> ^js (react/current-ref text-input-ref) .focus))
@@ -82,6 +86,15 @@
         :accessibility-label :send-message-button
         :color               (styles/send-icon-color)}])]])
 
+(defn send-button-old [on-send contact-request]
+  [rn/touchable-opacity {:on-press-in on-send}
+   [rn/view {:style (styles/send-message-button)}
+    (when-not contact-request
+      [icons/icon :main-icons/arrow-up
+       {:container-style     (styles/send-message-container contact-request)
+        :accessibility-label :send-message-button
+        :color               (styles/send-icon-color)}])]])
+
 (defn on-selection-change [timeout-id last-text-change mentionable-users args]
   (let [selection (.-selection ^js (.-nativeEvent ^js args))
         start (.-start selection)
@@ -128,14 +141,14 @@
   (swap! chat-input-key inc))
 
 (defn show-send [{:keys [actions-ref send-ref sticker-ref]}]
-  (quo.react/set-native-props actions-ref #js {:width 0 :left -88})
-  (quo.react/set-native-props send-ref #js {:width nil :right nil})
-  (quo.react/set-native-props sticker-ref #js {:width 0 :right -100}))
+  ;(quo.react/set-native-props actions-ref #js {:width 0 :left -88})
+  (quo.react/set-native-props send-ref #js {:width nil :right nil}))
+  ;(quo.react/set-native-props sticker-ref #js {:width 0 :right -100}))
 
 (defn hide-send [{:keys [actions-ref send-ref sticker-ref]}]
-  (quo.react/set-native-props actions-ref #js {:width nil :left nil})
-  (quo.react/set-native-props send-ref #js {:width 0 :right -100})
-  (quo.react/set-native-props sticker-ref #js {:width nil :right nil}))
+  ;(quo.react/set-native-props actions-ref #js {:width nil :left nil})
+  (quo.react/set-native-props send-ref #js {:width 0 :right -100}))
+  ;(quo.react/set-native-props sticker-ref #js {:width nil :right nil}))
 
 (defn reset-input [refs chat-id]
   (some-> ^js (react/current-ref (:text-input-ref refs)) .clear)
@@ -235,7 +248,7 @@
     (when platform/android?
       (re-frame/dispatch [::mentions/calculate-suggestions mentionable-users]))))
 
-(defn text-input [{:keys [set-active-panel refs chat-id sending-image]}]
+(defn text-input-old [{:keys [set-active-panel refs chat-id sending-image]}]
   (let [cooldown-enabled? @(re-frame/subscribe [:chats/cooldown-enabled?])
         mentionable-users @(re-frame/subscribe [:chats/mentionable-users])
         timeout-id (atom nil)
@@ -244,7 +257,7 @@
         contact-request @(re-frame/subscribe [:chats/sending-contact-request])]
 
     [rn/text-input
-     {:style                    (styles/text-input contact-request)
+     {:style                    (styles/text-input-old contact-request)
       :ref                      (:text-input-ref refs)
       :max-font-size-multiplier 1
       :accessibility-label      :chat-message-input
@@ -261,6 +274,45 @@
                                   (i18n/label :t/type-a-message))
       :underline-color-android  :transparent
       :auto-capitalize          :sentences
+      :on-selection-change      (partial on-selection-change timeout-id last-text-change mentionable-users)
+      :on-change                (partial on-change last-text-change timeout-id mentionable-users refs chat-id sending-image)
+      :on-text-input            (partial on-text-input mentionable-users chat-id)}
+     (if mentions-enabled
+       (for [[idx [type text]] (map-indexed
+                                 (fn [idx item]
+                                   [idx item])
+                                 @(re-frame/subscribe [:chat/input-with-mentions]))]
+         ^{:key (str idx "_" type "_" text)}
+         [rn/text (when (= type :mention) {:style {:color "#0DA4C9"}})
+          text])
+       (get @input-texts chat-id))]))
+
+(defn text-input [{:keys [set-active-panel refs chat-id sending-image on-content-size-change]}]
+  (let [cooldown-enabled? @(re-frame/subscribe [:chats/cooldown-enabled?])
+        mentionable-users @(re-frame/subscribe [:chats/mentionable-users])
+        timeout-id (atom nil)
+        last-text-change (atom nil)
+        mentions-enabled (get @mentions-enabled chat-id)]
+
+    [rn/text-input
+     {:style                    (styles/text-input)
+      :ref                      (:text-input-ref refs)
+      :max-font-size-multiplier 1
+      :accessibility-label      :chat-message-input
+      :text-align-vertical      :center
+      :multiline                true
+      :editable                 (not cooldown-enabled?)
+      :blur-on-submit           false
+      :auto-focus               false
+      :on-focus                 #(set-active-panel nil)
+      :max-length               chat.constants/max-text-size
+      :placeholder-text-color   (:text-02 @colors/theme)
+      :placeholder              (if cooldown-enabled?
+                                  (i18n/label :cooldown/text-input-disabled)
+                                  (i18n/label :t/type-a-message))
+      :underline-color-android  :transparent
+      :auto-capitalize          :sentences
+      :onContentSizeChange      on-content-size-change
       :on-selection-change      (partial on-selection-change timeout-id last-text-change mentionable-users)
       :on-change                (partial on-change last-text-change timeout-id mentionable-users refs chat-id sending-image)
       :on-text-input            (partial on-text-input mentionable-users chat-id)}
@@ -350,7 +402,7 @@
                       :active              active-panel
                       :set-active          set-active-panel}])])
 
-(defn chat-toolbar []
+(defn chat-toolbar-old []
   (let [actions-ref (quo.react/create-ref)
         send-ref (quo.react/create-ref)
         sticker-ref (quo.react/create-ref)
@@ -372,15 +424,15 @@
          [rn/view {:style (styles/input-container contact-request)}
           [send-image]
           [rn/view {:style styles/input-row}
-           [text-input {:chat-id          chat-id
-                        :sending-image    sending-image
-                        :refs             refs
-                        :set-active-panel set-active-panel}]
+           [text-input-old {:chat-id          chat-id
+                            :sending-image    sending-image
+                            :refs             refs
+                            :set-active-panel set-active-panel}]
            ;;SEND button
            [rn/view {:ref send-ref :style (when-not show-send {:width 0 :right -100})}
             (when send
-              [send-button #(do (clear-input chat-id refs)
-                                (re-frame/dispatch [:chat.ui/send-current-message]))
+              [send-button-old #(do (clear-input chat-id refs)
+                                    (re-frame/dispatch [:chat.ui/send-current-message]))
                contact-request])]
 
            ;;STICKERS and AUDIO buttons
@@ -399,3 +451,93 @@
                                        :active              active-panel
                                        :input-focus         #(input-focus text-input-ref)
                                        :set-active          set-active-panel}])])]]]))))
+
+(defn chat-input-bottom-sheet [chat-id text-input-ref]
+  (let [min-y -80
+        context (atom {:y min-y
+                       :min-y min-y
+                       :dy 0
+                       :pdy 0
+                       :full false})]
+    (fn []
+      [:f>
+       (fn []
+         (let [send-ref (quo.react/create-ref)
+               {window-height :height} (rn/use-window-dimensions)
+               max-y (- 150 window-height)
+               refs {;:actions-ref    actions-ref
+                     :send-ref       send-ref
+                     ;:sticker-ref    sticker-ref
+                     :text-input-ref text-input-ref}
+               translate-y (reanimated/use-shared-value 0)
+               bottom-sheet-gesture (-> (gesture/gesture-pan)
+                                        (gesture/on-start
+                                          (fn [_]
+                                              (swap! context assoc :y (reanimated/get-shared-value translate-y))))
+                                        (gesture/on-update
+                                          (fn [evt]
+                                            (swap! context assoc :dy (- (.-translationY evt) (:pdy @context)))
+                                            (swap! context assoc :pdy (.-translationY evt))
+                                            (reanimated/set-shared-value
+                                              translate-y
+                                              (max (min (+ (.-translationY evt) (:y @context)) min-y) max-y))
+                                            (println (.-velocityY evt) (+ (.-translationY evt) (:y @context)) window-height)))
+                                        (gesture/on-end
+                                          (fn [evt]
+                                            (println "END" (.-velocityY evt))
+                                            (if (<  (:dy @context) 0)
+                                              (do
+                                                (swap! context assoc :full true)
+                                                (reanimated/set-shared-value translate-y (reanimated/with-timing max-y)))
+                                              (do
+                                                (swap! context assoc :full false)
+                                                (reanimated/set-shared-value translate-y (reanimated/with-timing (:min-y @context))))))))
+               input-content-change (fn [evt]
+
+                                      (let [new-y (- min-y (oget evt "nativeEvent" "contentSize" "height"))]
+                                        (when (> new-y max-y)
+                                          (swap! context assoc :min-y new-y)
+                                          (when-not (:full @context)
+                                            (reanimated/set-shared-value
+                                              translate-y
+                                              (reanimated/with-timing new-y))))))]
+           (quo.react/effect! #(reanimated/set-shared-value translate-y (reanimated/with-spring min-y)))
+           [rn/view {:height 130}
+            [gesture/gesture-detector {:gesture bottom-sheet-gesture}
+             [reanimated/view {:style (reanimated/apply-animations-to-style
+                                        {:transform [{:translateY translate-y}]}
+                                        {:border-top-left-radius 20 :border-top-right-radius 20
+                                         :position :absolute :left 0 :right 0 :top 130
+                                         :height window-height
+                                         :background-color :white
+                                         :shadow-radius  16
+                                         :shadow-opacity 1
+                                         :shadow-color   "rgba(9, 16, 28, 0.04)"
+                                         :shadow-offset  {:width 0 :height -2}
+                                         :elevation 2})}
+              [rn/view
+               {:width            32
+                :height           4
+                :background-color :black
+                :opacity          0.05
+                :border-radius    100
+                :align-self :center
+                :margin-top 8}]
+              [rn/view {:flex 1}
+               [text-input {:chat-id          chat-id
+                            :on-content-size-change input-content-change
+                            :sending-image    false
+                            :refs             refs
+                            :set-active-panel #()}]]]]
+            [rn/view {:flex-direction :row :padding-horizontal 20 :padding-vertical 12
+                      :position :absolute :background-color :white :top 100}
+             [quo2/button {:icon true :type :outline :size 32} :main-icons2/image]
+             [rn/view {:width 12}]
+             [quo2/button {:icon true :type :outline :size 32} :main-icons2/reaction]
+             [rn/view {:flex 1}]
+             ;;SEND button
+             [rn/view {:ref send-ref :style (when-not show-send {:width 0 :right -100})}
+              [quo2/button {:icon true :size 32 :accessibility-label :send-message-button
+                            :on-press #(do (clear-input chat-id refs)
+                                           (re-frame/dispatch [:chat.ui/send-current-message]))}
+               :main-icons2/arrow-up]]]]))])))
