@@ -5,8 +5,7 @@
             [re-frame.core :as re-frame]
             [quo2.screens.button :as button]
             [quo2.screens.text :as text]
-            [quo.previews.reacts :as reacts]
-            [quo2.screens.alert :as alert]
+            [quo.previews.reacts :as reacts] 
             [quo2.screens.tabs :as tabs]
             [quo2.screens.counter :as counter]
             [quo2.screens.segmented :as segmented]
@@ -17,10 +16,7 @@
                :component text/preview-text}
               {:name      :reacts
                :insets    {:top false}
-               :component reacts/preview-text}
-              {:name      :quo2-alert
-               :insets    {:top true}
-               :component alert/alert}
+               :component reacts/preview-reacts} 
               {:name      :quo2-button
                :insets    {:top false}
                :component button/preview-button}
