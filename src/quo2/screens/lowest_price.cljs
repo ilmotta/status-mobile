@@ -17,7 +17,7 @@
                         :border-color (:text-01 @colors/theme)
                         :border-radius 1
                         :margin -2
-                        :poisiton :absolute
+                        :position :absolute
                         :top (* 0.017 height)
                         :bottom (* 0.01 height)
                         :opacity 0.4
@@ -36,7 +36,7 @@
                         :border-color (:text-01 @colors/theme)
                         :border-radius 1
                         :margin -2
-                        :poisiton :absolute
+                        :position :absolute
                         :top (* 0.017 height)
                         :bottom (* 0.01 height)
                         :opacity 0.4
