@@ -6,7 +6,9 @@
             [status-im.ui.components.icons.icons :as icons]))
 
 (defn channel-avatar [{:keys [big? dark? lock-status icon x y]}]
-  [rn/view {:style {:width (if big? 32 24)
+  (let [locked? (= :locked lock-status) 
+        lock-exists? (not= :none lock-status)]
+    [rn/view {:style {:width (if big? 32 24)
                     :height (if big? 32 24)
                     :top (if (or (clj-string/blank? x)
                                  (js/isNaN x))
@@ -16,9 +18,9 @@
                                   (js/isNaN y))
                             0
                             (js/parseInt y)) 
-                    :border-radius 100
-                    :background-color (if dark? "#131E37"
-                                          "#EDF0FC")}}
+                    :border-radius (if big? 32 24)
+                    :background-color (if dark? f-colors/neutral-70
+                                          f-colors/neutral-30)}}
    [rn/view {:style {:left (if big? 6 3)
                      :top (if big? 6 3)
                      :width 20
@@ -29,19 +31,19 @@
       {:color "nil"
        :width 15
        :height 15}]
-     (when (not= lock-status :none)
+     (when lock-exists?
        [rn/view {:style {:position :absolute
                          :left (if big? 12 6)
                          :top (if big? 12 6)
                          :background-color (if dark? f-colors/neutral-90
                                                "white")
-                         :border-radius 100
+                         :border-radius 15
                          :padding 2}}
-        [icons/icon (if (= lock-status :locked)
+        [icons/icon (if locked?
                       :main-icons/locked
                       :main-icons/unlocked)
          {:color (if dark?
                    f-colors/neutral-40
                    f-colors/neutral-50)
           :width 16
-          :height 16}]])]]])
+          :height 16}]])]]]))
