@@ -467,7 +467,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - secp256k1 (from `https://github.com/status-im/secp256k1.swift.git`)
   - SQLCipher (~> 3.0)
-  - SSZipArchive
+  - SSZipArchive (= 2.4.3)
   - TouchID (from `../node_modules/react-native-touch-id`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -635,7 +635,11 @@ SPEC CHECKSUMS:
   FBLazyVector: 3bb422f41b18121b71783a905c10e58606f7dc3e
   FBReactNativeSpec: f2c97f2529dd79c083355182cc158c9f98f4bd6e
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
+<<<<<<< HEAD
   glog: 502275bc0747df92346edbab1f40dacde2ec86d4
+=======
+  glog: 64a900d72fb14cd1b2cdf3b717a5555ceb889d49
+>>>>>>> 2d1a18b1c (Use flex layout instead of CSS layout)
   HMSegmentedControl: 34c1f54d822d8308e7b24f5d901ec674dfa31352
   Keycard: ac6df4d91525c3c82635ac24d4ddd9a80aca5fc8
   libwebp: 98a37e597e40bfdb4c911fc98f2c53d0b12d05fc
