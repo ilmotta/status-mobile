@@ -33,15 +33,15 @@
        :height 15}]
      (when lock-exists?
        [rn/view {:style {:position :absolute
-                         :left (if big? 12 6)
-                         :top (if big? 12 6)
+                         :left (if big? 16 8)
+                         :top (if big? 16 8)
                          :background-color (if dark? colors/neutral-90
                                                "white")
                          :border-radius 15
                          :padding 2}}
         [icons/icon (if locked?
-                      :main-icons/locked
-                      :main-icons/unlocked)
+                      :main-icons/locked16
+                      :main-icons/unlocked16)
          {:color (if dark?
                    colors/neutral-40
                    colors/neutral-50)

@@ -34,7 +34,7 @@
                              :big? true
                              :dark? true
                              :lock-status :locked
-                             :icon "peach"})]
+                             :icon "peach16"})]
     (fn []
       [rn/view {:margin-bottom 50
                 :padding       16}
