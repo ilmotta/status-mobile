@@ -1,54 +1,49 @@
 (ns quo2.screens.lowest-price
-  (:require [quo.design-system.colors :as colors]
+  (:require [quo2.foundations.colors :as f-colors]
             [quo.react-native :as rn]
-            [re-frame.core :as re-frame]))
+            [quo.previews.preview :as preview] 
+            [quo2.components.lowest-price :as quo2]
+            [reagent.core :as reagent]))
 
+(def descriptor [{:label "Top value"
+                  :key :top-value
+                  :type :text}
+                 {:label "Top value background color"
+                  :key :top-value-bg-color
+                  :type :text}
+                 {:label "Top value text color"
+                  :key :top-value-text-color
+                  :type :text}
+                 {:label "Bottom value"
+                  :key :bottom-value
+                  :type :text}
+                 {:label "Bottom value background color"
+                  :key :bottom-value-bg-color
+                  :type :text}
+                 {:label "Bottom value text color"
+                  :key :bottom-value-text-color
+                  :type :text}
+                 {:label "Margin top"
+                  :key :margin-top
+                  :type :text}])
 
-(defn render-item
-  [{:keys [value1 value2]}]
-  
-  (let [{:keys [height width]} @(re-frame/subscribe [:dimensions/window])] 
-    [rn/view {:style {:display :flex
-                      :flex-direction :column
-                      :height "100%"
-                      :justify-content :center}}
-     [rn/view {:style {:overflow :hidden}}
-      [rn/view {:style {:border-width 2
-                        :border-color (:text-01 @colors/theme)
-                        :border-radius 1
-                        :margin -2
-                        :top (* 0.017 height)
-                        :bottom (* 0.01 height)
-                        :opacity 0.4
-                        :margin-bottom 0
-                        :border-style :dotted}}]
-      [rn/view {:z-index 1
-                :margin-left (* 0.10 width)
-                :align-self :flex-start
-                :padding 6
-                :border-radius 3
-                :background-color (:ui-01 @colors/theme)}
-       [rn/text {:style {:color (:text-01 @colors/theme)}} value1]]]
-     [rn/view {:style {:overflow :hidden
-                       :margin-top 15}}
-      [rn/view {:style {:border-width 2
-                        :border-color (:text-01 @colors/theme)
-                        :border-radius 1
-                        :margin -2
-                        :top (* 0.017 height)
-                        :bottom (* 0.01 height)
-                        :opacity 0.4
-                        :margin-bottom 0
-                        :border-style :dotted}}]
-      [rn/view {:z-index 1
-                :align-self :flex-start
-                :margin-left (* 0.75 width)
-                :border-radius 3
-                :padding 6
-                :background-color (:ui-01 @colors/theme)}
-       [rn/text {:style {:color (:text-01 @colors/theme)}} value2]]]]))
+(defn cool-preview []
+  (let [state (reagent/atom {})]
+    (fn []
+      [rn/view {:margin-bottom 50
+                :padding       16}
+       [rn/view {:flex 1}
+        [preview/customizer state descriptor]]
+       [rn/view {:padding-vertical 60
+                 :flex-direction   :row
+                 :justify-content  :center}
+        [quo2/lowest-price @state]]])))
 
-(defn preview-lowest
-  []
-  [render-item {:value1 "$2,130.56"
-                :value2 "$2,130.56"}])
+(defn preview-lowest-price []
+  [rn/view {:background-color (f-colors/theme-colors f-colors/white
+                                                   f-colors/neutral-90)
+            :flex             1}
+   [rn/flat-list {:flex                      1
+                  :keyboardShouldPersistTaps :always
+                  :header                    [cool-preview]
+                  :key-fn                    str}]])
