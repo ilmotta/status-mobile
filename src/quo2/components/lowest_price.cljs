@@ -1,4 +1,4 @@
-(ns quo2.components.lowest-price 
+(ns quo2.components.lowest-price
   (:require [quo.design-system.colors :as colors]
             [quo.react-native :as rn]
             [re-frame.core :as re-frame]
@@ -16,7 +16,7 @@
     [rn/view {:style {:display :flex
                       :flex-direction :column
                       :width "100%"
-                      :margin-top (number-util/numerical-string margin-top) 
+                      :margin-top (number-util/numerical-string margin-top)
                       :justify-content :center}}
      [rn/view {:style {:overflow :hidden}}
       [rn/view {:style {:border-width 2

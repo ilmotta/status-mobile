@@ -1,7 +1,7 @@
 (ns quo2.screens.lowest-price
   (:require [quo2.foundations.colors :as f-colors]
             [quo.react-native :as rn]
-            [quo.previews.preview :as preview] 
+            [quo.previews.preview :as preview]
             [quo2.components.lowest-price :as quo2]
             [reagent.core :as reagent]))
 
@@ -41,7 +41,7 @@
 
 (defn preview-lowest-price []
   [rn/view {:background-color (f-colors/theme-colors f-colors/white
-                                                   f-colors/neutral-90)
+                                                     f-colors/neutral-90)
             :flex             1}
    [rn/flat-list {:flex                      1
                   :keyboardShouldPersistTaps :always

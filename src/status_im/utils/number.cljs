@@ -1,4 +1,4 @@
-(ns status-im.utils.number 
+(ns status-im.utils.number
   (:require [clojure.string :as clojure-string]))
 
 (defn numerical-string
