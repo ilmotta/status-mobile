@@ -5,6 +5,7 @@
             [re-frame.core :as re-frame]
             [quo2.screens.button :as button]
             [quo2.screens.text :as text]
+            [quo2.screens.lowest-price :as lowest-price]
             [quo2.screens.tabs :as tabs]
             [quo2.screens.status-tags :as status-tags]
             [quo2.screens.counter :as counter]
@@ -17,6 +18,9 @@
               {:name      :quo2-button
                :insets    {:top false}
                :component button/preview-button}
+              {:name      :lowest-price
+               :insets    {:top false}
+               :component lowest-price/preview-lowest}
               {:name      :quo2-status-tags
                :insets    {:top false}
                :component status-tags/preview-status-tags}
