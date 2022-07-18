@@ -249,9 +249,6 @@
 (def beige-opa-50 (alpha beige 0.5))
 (def beige-opa-60 (alpha beige 0.6))
 
-
-
-
 ;;;;Switcher
 (def switcher-background "#040B14")
 
