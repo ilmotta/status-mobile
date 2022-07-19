@@ -18,7 +18,7 @@
               {:name      :quo2-button
                :insets    {:top false}
                :component button/preview-button}
-               {:name      :quo2-icon-avatar
+              {:name      :quo2-icon-avatar
                :insets    {:top false}
                :component icon-avatar/preview-icon-avatar}
               {:name      :quo2-status-tags
