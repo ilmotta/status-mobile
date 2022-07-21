@@ -23,7 +23,8 @@
             [clojure.string :as string]
             [quo2.components.button :as quo2]
             [quo2.reanimated :as reanimated]
-            [quo2.gesture :as gesture]))
+            [quo2.gesture :as gesture]
+            [quo.components.safe-area :as safe-area]))
 
 (defn input-focus [text-input-ref]
   (some-> ^js (react/current-ref text-input-ref) .focus))
@@ -453,91 +454,93 @@
                                        :set-active          set-active-panel}])])]]]))))
 
 (defn chat-input-bottom-sheet [chat-id text-input-ref]
-  (let [min-y -80
-        context (atom {:y min-y
-                       :min-y min-y
-                       :dy 0
-                       :pdy 0
-                       :full false})]
-    (fn []
-      [:f>
+  [safe-area/consumer
+   (fn [insets]
+     (let [min-y (- -80 (:bottom insets))
+           context (atom {:y min-y
+                          :min-y min-y
+                          :dy 0
+                          :pdy 0
+                          :full false})]
        (fn []
-         (let [send-ref (quo.react/create-ref)
-               {window-height :height} (rn/use-window-dimensions)
-               max-y (- 150 window-height)
-               refs {;:actions-ref    actions-ref
-                     :send-ref       send-ref
-                     ;:sticker-ref    sticker-ref
-                     :text-input-ref text-input-ref}
-               translate-y (reanimated/use-shared-value 0)
-               bottom-sheet-gesture (-> (gesture/gesture-pan)
-                                        (gesture/on-start
-                                          (fn [_]
-                                              (swap! context assoc :y (reanimated/get-shared-value translate-y))))
-                                        (gesture/on-update
-                                          (fn [evt]
-                                            (swap! context assoc :dy (- (.-translationY evt) (:pdy @context)))
-                                            (swap! context assoc :pdy (.-translationY evt))
-                                            (reanimated/set-shared-value
-                                              translate-y
-                                              (max (min (+ (.-translationY evt) (:y @context)) min-y) max-y))
-                                            (println (.-velocityY evt) (+ (.-translationY evt) (:y @context)) window-height)))
-                                        (gesture/on-end
-                                          (fn [evt]
-                                            (println "END" (.-velocityY evt))
-                                            (if (<  (:dy @context) 0)
-                                              (do
-                                                (swap! context assoc :full true)
-                                                (reanimated/set-shared-value translate-y (reanimated/with-timing max-y)))
-                                              (do
-                                                (swap! context assoc :full false)
-                                                (reanimated/set-shared-value translate-y (reanimated/with-timing (:min-y @context))))))))
-               input-content-change (fn [evt]
+         [:f>
+          (fn []
+            (let [send-ref (quo.react/create-ref)
+                  {window-height :height} (rn/use-window-dimensions)
+                  max-y (- 150 window-height)
+                  refs {;:actions-ref    actions-ref
+                        :send-ref       send-ref
+                        ;:sticker-ref    sticker-ref
+                        :text-input-ref text-input-ref}
+                  translate-y (reanimated/use-shared-value 0)
+                  bottom-sheet-gesture (-> (gesture/gesture-pan)
+                                           (gesture/on-start
+                                             (fn [_]
+                                                 (swap! context assoc :y (reanimated/get-shared-value translate-y))))
+                                           (gesture/on-update
+                                             (fn [evt]
+                                               (swap! context assoc :dy (- (.-translationY evt) (:pdy @context)))
+                                               (swap! context assoc :pdy (.-translationY evt))
+                                               (reanimated/set-shared-value
+                                                 translate-y
+                                                 (max (min (+ (.-translationY evt) (:y @context)) min-y) max-y))
+                                               (println (.-velocityY evt) (+ (.-translationY evt) (:y @context)) window-height)))
+                                           (gesture/on-end
+                                             (fn [evt]
+                                               (if (<  (:dy @context) 0)
+                                                 (do
+                                                   (swap! context assoc :full true)
+                                                   (reanimated/set-shared-value translate-y (reanimated/with-timing max-y)))
+                                                 (do
+                                                   (swap! context assoc :full false)
+                                                   (reanimated/set-shared-value translate-y (reanimated/with-timing (:min-y @context))))))))
+                  input-content-change (fn [evt]
 
-                                      (let [new-y (- min-y (oget evt "nativeEvent" "contentSize" "height"))]
-                                        (when (> new-y max-y)
-                                          (swap! context assoc :min-y new-y)
-                                          (when-not (:full @context)
-                                            (reanimated/set-shared-value
-                                              translate-y
-                                              (reanimated/with-timing new-y))))))]
-           (quo.react/effect! #(reanimated/set-shared-value translate-y (reanimated/with-spring min-y)))
-           [rn/view {:height 130}
-            [gesture/gesture-detector {:gesture bottom-sheet-gesture}
-             [reanimated/view {:style (reanimated/apply-animations-to-style
-                                        {:transform [{:translateY translate-y}]}
-                                        {:border-top-left-radius 20 :border-top-right-radius 20
-                                         :position :absolute :left 0 :right 0 :top 130
-                                         :height window-height
-                                         :background-color :white
-                                         :shadow-radius  16
-                                         :shadow-opacity 1
-                                         :shadow-color   "rgba(9, 16, 28, 0.04)"
-                                         :shadow-offset  {:width 0 :height -2}
-                                         :elevation 2})}
-              [rn/view
-               {:width            32
-                :height           4
-                :background-color :black
-                :opacity          0.05
-                :border-radius    100
-                :align-self :center
-                :margin-top 8}]
-              [rn/view {:flex 1}
-               [text-input {:chat-id          chat-id
-                            :on-content-size-change input-content-change
-                            :sending-image    false
-                            :refs             refs
-                            :set-active-panel #()}]]]]
-            [rn/view {:flex-direction :row :padding-horizontal 20 :padding-vertical 12
-                      :position :absolute :background-color :white :top 100}
-             [quo2/button {:icon true :type :outline :size 32} :main-icons2/image]
-             [rn/view {:width 12}]
-             [quo2/button {:icon true :type :outline :size 32} :main-icons2/reaction]
-             [rn/view {:flex 1}]
-             ;;SEND button
-             [rn/view {:ref send-ref :style (when-not show-send {:width 0 :right -100})}
-              [quo2/button {:icon true :size 32 :accessibility-label :send-message-button
-                            :on-press #(do (clear-input chat-id refs)
-                                           (re-frame/dispatch [:chat.ui/send-current-message]))}
-               :main-icons2/arrow-up]]]]))])))
+                                         (let [new-y (- min-y (oget evt "nativeEvent" "contentSize" "height"))]
+                                           (when (> new-y max-y)
+                                             (swap! context assoc :min-y new-y)
+                                             (when-not (:full @context)
+                                               (reanimated/set-shared-value
+                                                 translate-y
+                                                 (reanimated/with-timing new-y))))))]
+              (quo.react/effect! #(reanimated/set-shared-value translate-y (reanimated/with-spring min-y)))
+              [rn/view {:height 100}
+               [gesture/gesture-detector {:gesture bottom-sheet-gesture}
+                [reanimated/view {:style (reanimated/apply-animations-to-style
+                                           {:transform [{:translateY translate-y}]}
+                                           {:border-top-left-radius 20 :border-top-right-radius 20
+                                            :position :absolute :left 0 :right 0 :top 100
+                                            :height window-height
+                                            :background-color :white
+                                            :shadow-radius  16
+                                            :shadow-opacity 1
+                                            :shadow-color   "rgba(9, 16, 28, 0.04)"
+                                            :shadow-offset  {:width 0 :height -2}
+                                            :elevation 2})}
+                 [rn/view
+                  {:width            32
+                   :height           4
+                   :background-color :black
+                   :opacity          0.05
+                   :border-radius    100
+                   :align-self :center
+                   :margin-top 8}]
+                 [rn/view {:flex 1}
+                  [text-input {:chat-id          chat-id
+                               :on-content-size-change input-content-change
+                               :sending-image    false
+                               :refs             refs
+                               :set-active-panel #()}]]]]
+               [rn/view {:flex-direction :row :padding-horizontal 20 :padding-vertical 12
+                         :padding-bottom (:bottom insets)
+                         :position :absolute :background-color :white :top (- 70 (:bottom insets))}
+                [quo2/button {:icon true :type :outline :size 32} :main-icons2/image]
+                [rn/view {:width 12}]
+                [quo2/button {:icon true :type :outline :size 32} :main-icons2/reaction]
+                [rn/view {:flex 1}]
+                ;;SEND button
+                [rn/view {:ref send-ref :style (when-not show-send {:width 0 :right -100})}
+                 [quo2/button {:icon true :size 32 :accessibility-label :send-message-button
+                               :on-press #(do (clear-input chat-id refs)
+                                              (re-frame/dispatch [:chat.ui/send-current-message]))}
+                  :main-icons2/arrow-up]]]]))])))])
