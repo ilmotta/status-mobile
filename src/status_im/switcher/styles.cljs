@@ -65,10 +65,16 @@
 (defn switcher-screen []
   (dissoc
    (merge-switcher-button-common-styles
-    {:background-color colors/switcher-background-opa-80
-     :z-index          1
+    {:z-index          1
      :overflow         :hidden})
    :justify-content))
+
+(defn switcher-blur-background []
+  (let [{:keys [width height]} (constants/dimensions)]
+    {:style         {:width  width
+                     :height (+ height constants/switcher-container-height-padding)}
+     :blur-amount   17
+     :overlay-color colors/switcher-background-opa-80}))
 
 (defn switcher-screen-container []
   (let [{:keys [width height]} (constants/dimensions)]
