@@ -5,6 +5,7 @@
             [re-frame.core :as re-frame]
             [quo2.screens.button :as button]
             [quo2.screens.text :as text]
+            [quo2.components.user-avatar :as user-avatar]
             [quo2.screens.tabs :as tabs]
             [quo2.screens.status-tags :as status-tags]
             [quo2.screens.counter :as counter]
@@ -23,6 +24,9 @@
               {:name      :quo2-tabs
                :insets    {:top false}
                :component tabs/preview-tabs}
+              {:name      :quo2-user-avatar
+               :insets    {:top false}
+               :component user-avatar/preview-user-avatar}
               {:name      :quo2-segmented
                :insets    {:top false}
                :component segmented/preview-segmented}
