@@ -5,7 +5,7 @@
             [status-im.ui.components.list.views :as list]
             [status-im.ui.components.react :as react]
             [status-im.ui.screens.home.styles :as styles]
-            [status-im.ui.screens.communities.community-views-redesign :as community-views]
+            [quo2.components.community-card-view :as community-card-view]
             [quo2.components.separator :as separator]
             [quo2.components.text :as quo2.text]
             [quo2.components.button :as quo2.button]
@@ -83,11 +83,11 @@
 
 (defn render-popular-fn [community-item]
   (if (= @view-style :card-view)
-    [community-views/community-card-view-item community-item]
-    [community-views/communities-list-view-item community-item]))
+    [community-card-view/community-card-view-item community-item :list-view]
+    [community-card-view/communities-list-view-item community-item :list-view]))
 
 (defn render-featured-fn [community-item]
-  [community-views/community-card-view-item community-item])
+  [community-card-view/community-card-view-item community-item])
 
 (defn community-list-key-fn [item]
   (:id item))
@@ -341,7 +341,8 @@
   (let [filters [{:id 1 :label "Crypto"  :emoji (resources/reactions :angry)}
                  {:id 2 :label "NFT"     :emoji (resources/reactions :love)}
                  {:id 3 :label "DeFi"    :emoji (resources/reactions :thumbs-up)}
-                 {:id 4 :label "NFT"     :emoji (resources/reactions :laugh)}]]
+                 {:id 4 :label "NFT"     :emoji (resources/reactions :laugh)}]
+        icon-color (quo2.colors/theme-colors quo2.colors/black quo2.colors/white)]
     [react/scroll-view {:horizontal                        true
                         :shows-horizontal-scroll-indicator false
                         :scroll-event-throttle             64
@@ -353,9 +354,7 @@
        [filter-tag/tag {:icon           :main-icons2/search
                         :with-label     false
                         :type           :icon
-                        :icon-color     (quo2.colors/theme-colors
-                                         quo2.colors/black
-                                         quo2.colors/white)}]]
+                        :icon-color     icon-color}]]
       [filter-tags/tags {:data          filters
                          :with-label    true
                          :type          :emoji}]]]))

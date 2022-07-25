@@ -51,7 +51,7 @@
     (when (> extra-counts 0)
       [react/view {:flex-direction :row}
        [react/view {:background-color (colors/theme-colors
-                                       colors/neutral-20
+                                       colors/neutral-10
                                        colors/neutral-70)
                     :border-radius    (case size 32 28 24 20)
                     :width            size
