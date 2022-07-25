@@ -193,6 +193,8 @@
 (def switcher-background-opa-90 (alpha switcher-background 0.9))
 (def switcher-background-opa-95 (alpha switcher-background 0.95))
 
+(def turquoise-50 "#448EA2")
+
 ;;General
 
 ;; background
