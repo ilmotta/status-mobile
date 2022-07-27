@@ -9,6 +9,7 @@
             [quo2.screens.status-tags :as status-tags]
             [quo2.screens.counter :as counter]
             [quo2.screens.segmented :as segmented]
+            [quo2.screens.community-card-view :as community-card]
             [quo.core :as quo]))
 
 (def screens [{:name      :quo2-texts
@@ -28,7 +29,10 @@
                :component segmented/preview-segmented}
               {:name      :quo2-counter
                :insets    {:top false}
-               :component counter/preview-counter}])
+               :component counter/preview-counter}
+              {:name      :quo2-community-cards
+               :insets    {:top false}
+               :component community-card/preview-community-card}])
 
 (defn theme-switcher []
   [rn/view {:style {:flex-direction   :row
