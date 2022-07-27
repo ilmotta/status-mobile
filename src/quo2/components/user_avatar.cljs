@@ -47,7 +47,7 @@
                         :height dimensions
                         :border-width border-width
                         :border-radius dimensions
-                        :border-color "white"
+                        :border-color colors/white
                         :position :absolute
                         :bottom bottom
                         :right right}}])))
