@@ -74,7 +74,7 @@
     {:style         {:width  width
                      :height (+ height constants/switcher-container-height-padding)}
      :blur-amount   17
-     :overlay-color colors/switcher-background-opa-80}))
+     :overlay-color colors/neutral-80-opa-80}))
 
 (defn switcher-screen-container []
   (let [{:keys [width height]} (constants/dimensions)]
