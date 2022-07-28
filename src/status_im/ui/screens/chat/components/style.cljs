@@ -54,13 +54,16 @@
   (merge typography/font-regular
          typography/base
          {:flex               1
+          :border-width 1
+          :border-color :red
           :min-height         34
           :margin             0
           :flex-shrink        1
           :color              (:text-01 @colors/theme)
           :margin-horizontal 20}
          (if platform/android?
-           {:padding-vertical 8}
+           {:padding-vertical 8
+            :text-align-vertical :top}
            {:margin-top    8
             :margin-bottom 8})))
 

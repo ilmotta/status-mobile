@@ -42,7 +42,8 @@
             [status-im.react-native.resources :as resources]
             [status-im.ui.components.topbar :as topbar]
             [quo2.foundations.colors :as quo2.colors]
-            [quo2.components.button :as quo2.button]))
+            [quo2.components.button :as quo2.button]
+            [status-im.ui.components.keyboard-avoid-presentation :as kb-presentation]))
 
 (defn invitation-requests [chat-id admins]
   (let [current-pk @(re-frame/subscribe [:multiaccount/public-key])
@@ -592,7 +593,7 @@
              ;; We set the key so we can force a re-render as
              ;; it does not rely on ratom but just atoms
              ^{:key (str @components/chat-input-key "chat-input")}
-             [components/chat-toolbar
+             [components/chat-toolbar-old
               {:chat-id          chat-id
                :active-panel     @active-panel
                :set-active-panel set-active-panel
@@ -618,7 +619,8 @@
             @(re-frame/subscribe [:chats/current-chat-chat-view])
             mutual-contact-requests-enabled? @(re-frame/subscribe [:mutual-contact-requests/enabled?])
             max-bottom-space (max @bottom-space @panel-space)]
-        [:<>
+        [react/keyboard-avoiding-view-new {:style {:flex 1}
+                                           :ignore-offset false}
          ;; It is better to not use topbar component because of performance
          [topbar/topbar {:navigation :none
                          :left-component [react/view {:flex-direction :row :margin-left 16}
@@ -646,26 +648,7 @@
             [invitation-bar chat-id]])
          [components/autocomplete-mentions text-input-ref max-bottom-space]
          (when show-input?
-           [components/chat-input-bottom-sheet chat-id text-input-ref]
-           ;; NOTE: this only accepts two children
-           #_[accessory/view {:y               position-y
-                              :pan-state       pan-state
-                              :has-panel       (boolean @active-panel)
-                              :on-close        on-close
-                              :on-update-inset on-update}
-              [react/view
-               [edit/edit-message-auto-focus-wrapper text-input-ref]
-               [reply/reply-message-auto-focus-wrapper text-input-ref]
-               ;; We set the key so we can force a re-render as
-               ;; it does not rely on ratom but just atoms
-               ^{:key (str @components/chat-input-key "chat-input")}
-               [components/chat-toolbar-old
-                {:chat-id          chat-id
-                 :active-panel     @active-panel
-                 :set-active-panel set-active-panel
-                 :text-input-ref   text-input-ref}]
-               [contact-request/contact-request-message-auto-focus-wrapper text-input-ref]]
-              [bottom-sheet @active-panel]])]))))
+           [components/chat-input-bottom-sheet chat-id text-input-ref])]))))
 
 (defn chat-old []
   (reagent/create-class

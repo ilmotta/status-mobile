@@ -456,7 +456,7 @@
 (defn chat-input-bottom-sheet [chat-id text-input-ref]
   [safe-area/consumer
    (fn [insets]
-     (let [min-y (- -80 (:bottom insets))
+     (let [min-y -100
            context (atom {:y min-y
                           :min-y min-y
                           :dy 0
@@ -467,11 +467,15 @@
           (fn []
             (let [send-ref (quo.react/create-ref)
                   {window-height :height} (rn/use-window-dimensions)
-                  max-y (- 150 window-height)
+                  {:keys [keyboard-shown
+                          keyboard-height]} (rn/use-keyboard)
+                  keyboard-delta (if keyboard-shown (or keyboard-height 350) 0)
+                  max-y (- 80 (- window-height keyboard-delta))
                   refs {;:actions-ref    actions-ref
                         :send-ref       send-ref
                         ;:sticker-ref    sticker-ref
                         :text-input-ref text-input-ref}
+
                   translate-y (reanimated/use-shared-value 0)
                   bottom-sheet-gesture (-> (gesture/gesture-pan)
                                            (gesture/on-start
@@ -495,7 +499,7 @@
                                                    (swap! context assoc :full false)
                                                    (reanimated/set-shared-value translate-y (reanimated/with-timing (:min-y @context))))))))
                   input-content-change (fn [evt]
-
+                                         (println "CONT"  (oget evt "nativeEvent" "contentSize" "height"))
                                          (let [new-y (- min-y (oget evt "nativeEvent" "contentSize" "height"))]
                                            (when (> new-y max-y)
                                              (swap! context assoc :min-y new-y)
@@ -503,20 +507,25 @@
                                                (reanimated/set-shared-value
                                                  translate-y
                                                  (reanimated/with-timing new-y))))))]
-              (quo.react/effect! #(reanimated/set-shared-value translate-y (reanimated/with-spring min-y)))
-              [rn/view {:height 100}
+              (println "RENDER" keyboard-shown keyboard-height (min (max max-y (:min-y @context)) min-y))
+              (quo.react/effect! #(when (or (not keyboard-shown) (and keyboard-shown (> keyboard-height 0)))
+                                    (reanimated/set-shared-value translate-y (reanimated/with-spring (min (max max-y (:min-y @context)) min-y)))))
+              [rn/view {:height 100 :border-color :red :border-width 1}
                [gesture/gesture-detector {:gesture bottom-sheet-gesture}
                 [reanimated/view {:style (reanimated/apply-animations-to-style
                                            {:transform [{:translateY translate-y}]}
                                            {:border-top-left-radius 20 :border-top-right-radius 20
-                                            :position :absolute :left 0 :right 0 :top 100
+                                            :position :absolute :left 0 :right 0
+                                            :top 100
                                             :height window-height
+                                            :flex 1
                                             :background-color :white
                                             :shadow-radius  16
                                             :shadow-opacity 1
                                             :shadow-color   "rgba(9, 16, 28, 0.04)"
                                             :shadow-offset  {:width 0 :height -2}
-                                            :elevation 2})}
+                                            :elevation 2
+                                            :z-index 1000})}
                  [rn/view
                   {:width            32
                    :height           4
@@ -525,15 +534,17 @@
                    :border-radius    100
                    :align-self :center
                    :margin-top 8}]
-                 [rn/view {:flex 1}
+                 [rn/view {:style {:height (- (- max-y) 80)}}
                   [text-input {:chat-id          chat-id
                                :on-content-size-change input-content-change
                                :sending-image    false
                                :refs             refs
                                :set-active-panel #()}]]]]
                [rn/view {:flex-direction :row :padding-horizontal 20 :padding-vertical 12
-                         :padding-bottom (:bottom insets)
-                         :position :absolute :background-color :white :top (- 70 (:bottom insets))}
+                         :elevation 2
+                         :z-index 2000
+                         :padding-bottom (+ 5 (:bottom insets)) :border-color :blue :border-width 1
+                         :position :absolute :background-color :white :bottom (- 5 (:bottom insets))}
                 [quo2/button {:icon true :type :outline :size 32} :main-icons2/image]
                 [rn/view {:width 12}]
                 [quo2/button {:icon true :type :outline :size 32} :main-icons2/reaction]
